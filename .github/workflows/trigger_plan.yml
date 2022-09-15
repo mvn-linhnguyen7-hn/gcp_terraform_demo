@@ -1,0 +1,33 @@
+name: trigger_plan
+on:
+  # pull_request:
+  #   branches:
+  #     - develop
+  #     - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Select the environment to deploy to:"
+        required: true
+        options:
+          - develop
+          - main
+      folder:
+        type: choice
+        description: "Select the folder:"
+        required: true
+        options:
+          - ig
+          - gke
+          - serverless
+          - gcp_funtions
+jobs:
+  dispatch_plan:
+    name: Dispatch Plan
+    uses: ./.github/workflows/plan.yml
+    if: github.event_name == 'workflow_dispatch'
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      folder: ${{ github.event.inputs.folder }}
+    secrets: inherit
