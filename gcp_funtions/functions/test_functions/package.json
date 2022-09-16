@@ -1,0 +1,13 @@
+{
+
+  "name": "sample-http",
+  
+  "dependencies": {
+  
+  "@google-cloud/compute": "0.7.1"
+  
+  },
+  
+  "version": "0.0.1"
+  
+  }
