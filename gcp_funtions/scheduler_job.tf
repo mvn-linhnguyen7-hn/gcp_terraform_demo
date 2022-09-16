@@ -1,7 +1,7 @@
 resource "google_cloud_scheduler_job" "startVm_scheduler" {
   name        = "startup-dev-instances"
   schedule    = "30 8 * * 1-5"
-  time_zone   = "Asia/Tokyo"
+  time_zone   = "Asia/Saigon"
 
   pubsub_target {
     topic_name = google_pubsub_topic.startVm_topic.id
@@ -12,7 +12,7 @@ resource "google_cloud_scheduler_job" "startVm_scheduler" {
 resource "google_cloud_scheduler_job" "stopVm_scheduler" {
   name        = "shutdown-dev-instances"
   schedule    = "30 17 * * 1-5"
-  time_zone   = "Asia/Tokyo"
+  time_zone   = "Asia/Saigon"
 
   pubsub_target {
     topic_name = google_pubsub_topic.stopVm_topic.id
