@@ -1,0 +1,54 @@
+name: Terraform Test and Lint
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: tflint gcp_funtions
+        uses: reviewdog/action-tflint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          working_directory: "gcp_funtions"
+          reporter: github-pr-check
+          fail_on_error: true
+          level: info
+          filter_mode: nofilter
+          tflint_rulesets: google
+
+      - name: tflint gke
+        uses: reviewdog/action-tflint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          working_directory: "gke"
+          reporter: github-pr-check
+          fail_on_error: true
+          level: info
+          filter_mode: nofilter
+          tflint_rulesets: google
+
+      - name: tflint ig
+        uses: reviewdog/action-tflint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          working_directory: "ig"
+          reporter: github-pr-check
+          fail_on_error: true
+          level: info
+          filter_mode: nofilter
+          tflint_rulesets: google
+
+      - name: tflint serverless
+        uses: reviewdog/action-tflint@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          working_directory: "serverless"
+          reporter: github-pr-check
+          fail_on_error: true
+          level: info
+          filter_mode: nofilter
+          tflint_rulesets: google

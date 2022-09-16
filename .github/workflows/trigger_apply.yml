@@ -1,0 +1,71 @@
+name: trigger_apply
+on:
+  # push:
+  #   branches:
+  #     - develop
+  #     - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Select the environment to deploy to:"
+        required: true
+        options:
+          - develop
+          - main
+      folder:
+        type: choice
+        description: "Select the folder:"
+        required: true
+        options:
+          - ig
+          - gke
+          - serverless
+          - gcp_funtions
+      auto_approve:
+        type: boolean
+        description: "Check this to automatically approve changes."
+        required: false
+        default: false
+      apply:
+        type: boolean
+        description: "Check this to apply all."
+        required: false
+        default: false
+      apply_target:
+        type: string
+        description: "Apply target: Sample: aws_s3_bucket.demo_bucket"
+        required: false
+      import:
+        type: string
+        description: "Import: Sample: aws_s3_bucket.demo_bucket an1-demo-bucket"
+        required: false
+      state_rm:
+        type: string
+        description: "State Remove: Sample: aws_s3_bucket.demo_bucket"
+        required: false
+      custom_command:
+        type: string
+        description: "Specify terraform custom command."
+        required: false
+      destroy:
+        type: string
+        description: "Destroy: Sample: aws_s3_bucket.demo_bucket"
+        required: false
+
+jobs:
+  dispatch_apply:
+    name: Dispatch Apply
+    uses: ./.github/workflows/apply.yml
+    if: github.event_name == 'workflow_dispatch'
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      folder: ${{ github.event.inputs.folder }}
+      auto_approve: ${{ github.event.inputs.auto_approve }}
+      apply: ${{ github.event.inputs.apply }}
+      apply_target: ${{ github.event.inputs.apply_target }}
+      import: ${{ github.event.inputs.import }}
+      state_rm: ${{ github.event.inputs.state_rm }}
+      custom_command: ${{ github.event.inputs.custom_command }}
+      destroy: ${{ github.event.inputs.destroy }}
+    secrets: inherit

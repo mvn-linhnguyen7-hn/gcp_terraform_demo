@@ -1,0 +1,164 @@
+name: apply
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      folder:
+        required: true
+        type: string
+      auto_approve:
+        type: string
+        required: false
+        default: false
+      apply:
+        type: string
+        required: false
+        default: false
+      apply_target:
+        type: string
+        required: false
+      import:
+        type: string
+        required: false
+      state_rm:
+        type: string
+        required: false
+      custom_command:
+        type: string
+        required: false
+      destroy:
+        type: string
+        required: false
+
+env:
+  GCP_ENV: ${{ secrets.GCP_ENV }}
+  GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+  GCP_CREDENTIALS: ${{ secrets.GCP_TERRAFORM_KEY }}
+
+jobs:
+  apply:
+    name: Applying Terraform - ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ env.GCP_CREDENTIALS }}"
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+
+      - name: Enable APIs
+        run: |-
+          gcloud services enable iam.googleapis.com
+          gcloud services enable recommender.googleapis.com
+          gcloud services enable cloudresourcemanager.googleapis.com
+          gcloud services enable containerregistry.googleapis.com
+          gcloud services enable run.googleapis.com
+          gcloud services enable dns.googleapis.com
+          gcloud services enable compute.googleapis.com
+          gcloud services enable cloudbuild.googleapis.com
+          gcloud services enable cloudfunctions.googleapis.com
+          gcloud services enable cloudscheduler.googleapis.com
+          gcloud services enable pubsub.googleapis.com
+          gcloud services enable appengine.googleapis.com
+          gcloud services enable monitoring.googleapis.com
+          gcloud services enable firestore.googleapis.com
+          gcloud services enable secretmanager.googleapis.com
+          echo "--------------------------------------------------------------"
+          echo "Enabled API list:"
+          echo "--------------------------------------------------------------"
+          gcloud services list
+
+      - name: Remove default.tflock if exist
+        env:
+          TF_FOLDER: ${{ inputs.folder }}
+        run: gsutil rm gs://${{ env.GCP_PROJECT }}-${{ env.TF_FOLDER }}-tfstate-files/default.tflock || true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.2.8
+
+      - name: Terraform Init
+        id: init
+        env:
+          TF_FOLDER: ${{ inputs.folder }}
+        run: |
+          cd ${{ env.TF_FOLDER }}
+          terraform init -reconfigure -backend=true -backend-config="bucket=${{ env.GCP_PROJECT }}-${{ env.TF_FOLDER }}-tfstate-files" -backend-config="credentials=$GOOGLE_APPLICATION_CREDENTIALS"
+
+      - name: Terraform Import
+        if: inputs.import != null
+        env:
+          TF_RESOURCE: ${{ inputs.import }}
+        run: terraform import ${{ env.TF_RESOURCE }}
+
+      - name: Terraform State Remove
+        if: inputs.state_rm != null
+        env:
+          TF_RESOURCE: ${{ inputs.state_rm }}
+        run: terraform state rm ${{ env.TF_RESOURCE }}
+
+      - name: Terraform Destroy
+        if: inputs.destroy != null
+        env:
+          TF_FOLDER: ${{ inputs.folder }}
+          TF_AUTO_APPROVE: ${{ inputs.auto_approve }}
+          TF_RESOURCE: ${{ inputs.destroy }}
+        run: |
+          cd ${{ env.TF_FOLDER }}
+          if [[ ${{ env.TF_AUTO_APPROVE }} == 'true' ]]; then
+            terraform apply -destroy --target ${{ env.TF_RESOURCE }} -auto-approve
+          else
+            terraform plan -destroy --target ${{ env.TF_RESOURCE }}
+          fi
+
+      - name: Terraform Apply Target
+        if: inputs.apply_target != null
+        env:
+          TF_FOLDER: ${{ inputs.folder }}
+          TF_AUTO_APPROVE: ${{ inputs.auto_approve }}
+          TF_RESOURCE: ${{ inputs.apply_target }}
+        run: |
+          cd ${{ env.TF_FOLDER }}
+          if [[ ${{ env.TF_AUTO_APPROVE }} == 'true' ]]; then
+            terraform apply --target ${{ env.TF_RESOURCE }} -auto-approve
+          else
+            terraform plan --target ${{ env.TF_RESOURCE }}
+          fi
+
+      - name: Terraform Custom Command
+        if: inputs.custom_command != null
+        env:
+          TF_FOLDER: ${{ inputs.folder }}
+          TF_AUTO_APPROVE: ${{ inputs.auto_approve }}
+          TF_COMMAND: ${{ inputs.custom_command }}
+        run: |
+          cd ${{ env.TF_FOLDER }}
+          if [[ ${{ env.TF_AUTO_APPROVE }} == 'true' ]]; then
+            terraform ${{ env.TF_COMMAND }} -auto-approve
+          else
+            terraform ${{ env.TF_COMMAND }} --var-file=./terraform.tfvars
+          fi
+          
+      - name: Terraform Apply All
+        if: ${{ inputs.apply == 'true' }}
+        env:
+          TF_FOLDER: ${{ inputs.folder }}
+          TF_AUTO_APPROVE: ${{ inputs.auto_approve }}
+        run: |
+          cd ${{ env.TF_FOLDER }}
+          if [[ ${{ env.TF_AUTO_APPROVE }} == 'true' ]]; then
+            terraform apply -auto-approve
+          else
+            terraform plan --var-file=./terraform.tfvars
+          fi
