@@ -3,3 +3,4 @@
 **.tfstate
 **.tfstate.**
 gcp-terraform-key.json
+kubeconfig
