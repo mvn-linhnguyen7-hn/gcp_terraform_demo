@@ -1,13 +1,6 @@
 {
-
-  "name": "sample-http",
-  
   "dependencies": {
-  
-  "@google-cloud/compute": "0.7.1"
-  
-  },
-  
-  "version": "0.0.1"
-  
+    "firebase-admin": "^10.0.2",
+    "firebase-functions": "^3.18.0"
   }
+}

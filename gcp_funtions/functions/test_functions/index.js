@@ -1,19 +1,11 @@
-var Compute = require('@google-cloud/compute');
+const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+admin.initializeApp(functions.config().firebase);
 
-var compute = Compute();
-
-exports.startInstance = function startInstance(req, res) {
-
-    var zone = compute.zone('asia-south1-c');
-
-    var vm = zone.vm('duo');
-
-    vm.start(function(err, operation, apiResponse) {
-
-        console.log('instance start successfully');
-
-    });
-
-res.status(200).send('DUO has Started!!');
-
-};
+// // Create and Deploy Your First Cloud Functions
+// // https://firebase.google.com/docs/functions/write-firebase-functions
+//
+ exports.helloWorld = functions.https.onRequest((request, response) => {
+   functions.logger.info("Hello logs!", {structuredData: true});
+   response.send(":)");
+ });
