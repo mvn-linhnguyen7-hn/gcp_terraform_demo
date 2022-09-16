@@ -1,16 +1,16 @@
 name: Terraform Test and Lint
 
-on: [push,pull_request]
+on: [push]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: tflint gcp_funtions
-        uses: reviewdog/action-tflint@v1.13.0
+        uses: reviewdog/action-tflint@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           working_directory: "gcp_funtions"
@@ -19,19 +19,9 @@ jobs:
           level: info
           filter_mode: nofilter
           tflint_rulesets: google
-
-      - name: security check gcp_funtions
-        uses: reviewdog/action-tfsec@v1.15.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          working_directory: "gcp_funtions"
-          reporter: github-pr-check
-          fail_on_error: true
-          level: info
-          filter_mode: nofilter
 
       - name: tflint gke
-        uses: reviewdog/action-tflint@v1.13.0
+        uses: reviewdog/action-tflint@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           working_directory: "gke"
@@ -40,19 +30,9 @@ jobs:
           level: info
           filter_mode: nofilter
           tflint_rulesets: google
-
-      - name: security check gke
-        uses: reviewdog/action-tfsec@v1.15.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          working_directory: "gke"
-          reporter: github-pr-check
-          fail_on_error: true
-          level: info
-          filter_mode: nofilter
 
       - name: tflint ig
-        uses: reviewdog/action-tflint@v1.13.0
+        uses: reviewdog/action-tflint@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           working_directory: "ig"
@@ -61,19 +41,9 @@ jobs:
           level: info
           filter_mode: nofilter
           tflint_rulesets: google
-
-      - name: security check ig
-        uses: reviewdog/action-tfsec@v1.15.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          working_directory: "ig"
-          reporter: github-pr-check
-          fail_on_error: true
-          level: info
-          filter_mode: nofilter
 
       - name: tflint serverless
-        uses: reviewdog/action-tflint@v1.13.0
+        uses: reviewdog/action-tflint@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           working_directory: "serverless"
@@ -82,13 +52,3 @@ jobs:
           level: info
           filter_mode: nofilter
           tflint_rulesets: google
-
-      - name: security check serverless
-        uses: reviewdog/action-tfsec@v1.15.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          working_directory: "serverless"
-          reporter: github-pr-check
-          fail_on_error: true
-          level: info
-          filter_mode: nofilter
