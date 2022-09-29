@@ -30,5 +30,4 @@ jobs:
     with:
       environment: ${{ github.event.inputs.environment }}
       folder: ${{ github.event.inputs.folder }}
-      issue_number: ${{ github.event.pull_request.number }}
     secrets: inherit
