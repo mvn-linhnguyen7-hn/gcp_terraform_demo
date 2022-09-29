@@ -5,8 +5,8 @@ terraform {
       version = "4.33.0"
     }
   }
-  # backend "gcs" {
-  # }
+  backend "gcs" {
+  }
 }
 
 provider "google" {
